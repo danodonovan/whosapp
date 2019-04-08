@@ -1,16 +1,17 @@
 from textwrap import dedent
 import io
+import string
 
 from precisely import assert_that, contains_exactly
 
-from whatsapp.extract import extract_text
+from whatsapp.extract import extract_text, clean_text, clean_text_lines
 
 
 def test_extract_text_extracts_text_strings():
     text = io.StringIO(dedent("""\
-[05/06/2018, 18:54:06] John Smith: Flights booked. Maybe we can meet up and cook all together?
-[17/08/2018, 23:52:10] John Smith: Oh my! At least it went a hip!!! 😬
-[13/01/2019, 22:20:03] Glenn Quagmire: Happy Anniversary to you Jim.
+        [05/06/2018, 18:54:06] John Smith: Flights booked. Maybe we can meet up and cook all together?
+        [17/08/2018, 23:52:10] John Smith: Oh my! At least it went a hip!!! 😬
+        [13/01/2019, 22:20:03] Glenn Quagmire: Happy Anniversary to you Jim.
     """))
 
     text_lines = extract_text(text)
@@ -19,4 +20,38 @@ def test_extract_text_extracts_text_strings():
         "Flights booked. Maybe we can meet up and cook all together?",
         "Oh my! At least it went a hip!!! 😬",
         "Happy Anniversary to you Jim."
+    ))
+
+
+def test_clean_text_removes_normalises_text():
+    text = "Oh my! At least it went a hip!!! 😬"
+    table = str.maketrans("", "", string.punctuation)
+
+    cleaned_text = clean_text(text, table=table)
+
+    assert_that(cleaned_text, contains_exactly(
+        "oh", "my", "at", "least", "it", "went", "a", "hip", "😬"
+    ))
+
+
+def test_clean_text_lines_removes_normalised_text_lines():
+    text_lines = [
+        "Flights booked. Maybe we can meet up and cook all together?",
+        "Oh my! At least it went a hip!!! 😬",
+        "Happy Anniversary to you Jim."
+    ]
+
+    cleaned_lines = clean_text_lines(text_lines)
+
+    assert_that(cleaned_lines, contains_exactly(
+        contains_exactly(
+            "flights", "booked", "maybe", "we", "can", "meet", "up", "and",
+            "cook", "all", "together",
+        ),
+        contains_exactly(
+            "oh", "my", "at", "least", "it", "went", "a", "hip", "😬"
+        ),
+        contains_exactly(
+            "happy", "anniversary", "to", "you", "jim"
+        )
     ))
