@@ -28,6 +28,13 @@ def build_word2id(words):
     )
 
 
+def build_id2word(word2id):
+    return _to_dict(
+        (index, word)
+        for word, index in word2id.items()
+    )
+
+
 def _to_dict(values):
     result = dict()
 

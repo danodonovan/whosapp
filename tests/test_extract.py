@@ -8,7 +8,7 @@ from precisely import (
 )
 
 from whatsapp.extract import (
-    extract_text, clean_text, clean_text_lines, build_word2id
+    extract_text, clean_text, clean_text_lines, build_word2id, build_id2word
 )
 
 
@@ -82,4 +82,23 @@ def test_build_word2id_creates_word_id_mapping():
         "cook": _is_in_range(4),
         "all": _is_in_range(4),
         "together": _is_in_range(4),
+    }))
+
+
+def test_build_id2word_reverses_word2id_mapping():
+    word2id = {
+        "flights": 0,
+        "booked": 1,
+        "cook": 2,
+        "all": 3,
+        "together": 4,
+    }
+    id2word = build_id2word(word2id)
+
+    assert_that(id2word, is_mapping({
+        0: is_instance(str),
+        1: is_instance(str),
+        2: is_instance(str),
+        3: is_instance(str),
+        4: is_instance(str),
     }))
