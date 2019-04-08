@@ -2,9 +2,14 @@ from textwrap import dedent
 import io
 import string
 
-from precisely import assert_that, contains_exactly
+from precisely import (
+    assert_that, contains_exactly, is_mapping, all_of, is_instance,
+    less_than_or_equal_to
+)
 
-from whatsapp.extract import extract_text, clean_text, clean_text_lines
+from whatsapp.extract import (
+    extract_text, clean_text, clean_text_lines, build_word2id
+)
 
 
 def test_extract_text_extracts_text_strings():
@@ -55,3 +60,26 @@ def test_clean_text_lines_removes_normalised_text_lines():
             "happy", "anniversary", "to", "you", "jim"
         )
     ))
+
+
+def _is_in_range(max_value):
+    return all_of(
+        is_instance(int),
+        less_than_or_equal_to(max_value)
+    )
+
+
+def test_build_word2id_creates_word_id_mapping():
+    words = [
+        "flights", "booked", "booked",
+        "cook", "all", "together",
+    ]
+    word2id = build_word2id(words)
+
+    assert_that(word2id, is_mapping({
+        "flights": _is_in_range(4),
+        "booked": _is_in_range(4),
+        "cook": _is_in_range(4),
+        "all": _is_in_range(4),
+        "together": _is_in_range(4),
+    }))
