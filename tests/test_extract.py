@@ -28,6 +28,19 @@ def test_extract_text_extracts_text_strings():
     ))
 
 
+def test_extract_drops_lines_containing_left_to_right_mark_character():
+    text = io.StringIO(dedent("""\
+        [02/08/2016, 06:44:26] \u200eYou added Gary Barker
+        [17/08/2018, 23:52:10] John Smith: Oh my! At least it went a hip!!! 😬
+    """))
+
+    text_lines = extract_text(text)
+
+    assert_that(text_lines, contains_exactly(
+        "Oh my! At least it went a hip!!! 😬",
+    ))
+
+
 def test_clean_text_removes_normalises_text():
     text = "Oh my! At least it went a hip!!! 😬"
     table = str.maketrans("", "", string.punctuation)

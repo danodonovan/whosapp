@@ -3,6 +3,8 @@ import string
 
 def extract_text(text):
     for line in text.readlines():
+        if "\u200E" in line:
+            continue
         split_string = line.split(":", 3)
         yield split_string[-1].strip()
 
